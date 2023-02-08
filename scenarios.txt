@@ -1,0 +1,33 @@
+Input Data: 
+
+[(direction_vector xyz), angle, distance, weekday, current_time, (current_values_smart_devices) ]
+
+Scenario 1: 
+
+Show on Device, ignore weekday, ignore time, ignore current value 
+
+
+Day Routing: 
+
+Every Workday: 
+    - Time 8:00 Switch on light, on show on light 
+    - Time 8:00 Turn Radiator on 24.5 
+    - Time 8:00 Window open when closed 
+
+Every Workday: 
+    - Time 9:00 Switch off light, on show on light 
+    - Time 9:00 Turn Radiator on min 
+    - Time 9:00 Window close 
+
+Every Workday: 
+    - Time 18:00 Switch on light, on show on light 
+    - Time 18:00 Turn Radiator on 24,5 
+    - time 18:00 Window open 
+
+Every Workday: 
+    - Time: 20:00 Window close 
+    
+Every Workday: 
+    - Time 23:30 Switch off light, on show on light 
+    - time 23:30 Turn Radiator on min 
+    
