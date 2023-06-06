@@ -1,60 +1,74 @@
-from utils.interfaces import get_random_relevance, RELEVANCE
-from fixture import SMART_DEVICES, MAX_INTERFACE_SLOTS, INTERFACES
-from utils.position import (
-    random_smart_device, 
-    random_position_in_room, 
-    calc_direction_vector, 
-    calc_angle_between_position_and_device,
-    calc_distance_for_position_in_room
-)
+import random
 
+from fixture import INTERFACES, MAX_INTERFACE_SLOTS, SMART_DEVICES
+from utils.interfaces import RELEVANCE, get_random_relevance
+from utils.position import (
+    calc_angle_between_position_and_device,
+    calc_direction_vector,
+    calc_distance_for_position_in_room,
+    random_position_in_room,
+    random_smart_device,
+)
 from utils.time import TimeFaker
-import random 
 
 
 def _randrange_float(start, stop, step):
     return random.randint(0, int((stop - start) / step)) * step + start
 
-def szenario_1_data(loop=1): 
-    # show random on devices and want this view
+
+# scenario 1
+def szenario_1_data(loop=1):
+    # show random on devices and want the right interface
+    # except special scenario inputs
     out = []
     res = []
-    for _ in range(loop): 
+    interfaces = []
+    for _ in range(loop):
         temp_out = []
+
+        # get a random smart device
         smart_device = random_smart_device()
+        # get a random position in the room
         rand_pos = random_position_in_room()
+        # calculate direction_vector from random position to smart device
         direction_vector = calc_direction_vector(smart_device, rand_pos)
-        temp_out.extend(direction_vector)
-        angles = []
-        distances = []
-        rand_values = []
-        for s_key, s_value in SMART_DEVICES.items(): 
-            temp_direction_vector = calc_direction_vector((s_key,s_value),rand_pos,add_noise=False)
-            temp_angle = calc_angle_between_position_and_device(direction_vector, s_value['position'], rand_pos)
+        # temp_out.extend(direction_vector)
+        angles = []  # list of angles of each device
+        distances = []  # list of distances from random postion to each device
+
+        # calculate angle and distance for each smart device
+        for s_key, s_value in SMART_DEVICES.items():
+            temp_direction_vector = calc_direction_vector(
+                (s_key, s_value), rand_pos, add_noise=False
+            )
+            temp_angle = calc_angle_between_position_and_device(
+                direction_vector, s_value["position"], rand_pos
+            )
             temp_distance = calc_distance_for_position_in_room(temp_direction_vector)
             angles.append(temp_angle)
             distances.append(temp_distance)
-            rand_values.append(_randrange_float(*s_value["values"]))
-        temp_out.extend(angles)
-        temp_out.extend(distances)
-        temp_out.append(TimeFaker().random_datetime.isoformat())
-        temp_out.extend(rand_values)
+
+        angles /= max(angles)  # normalize angles
+        temp_out.extend(angles)  # append angels
+        distances /= max(distances)  # normilize distances
+        temp_out.extend(distances)  ## append angles
+
+        # add time to data
+        # TODO: prevent scenario 2 and 3 time in random datetime
+        temp_out.extend(TimeFaker().get_random_datetime_as_list())
         out.append(temp_out)
-        device_relevance = [get_random_relevance(RELEVANCE['irrelevant']) for _ in range(len(SMART_DEVICES.keys()))]
-        device_relevance[list(SMART_DEVICES.keys()).index(smart_device[0])] = get_random_relevance(RELEVANCE['high'])
-        res.extend(device_relevance)
-        
-        interfaces = []
-        for i in range(MAX_INTERFACE_SLOTS): 
-            for interface in INTERFACES: 
-                # check if interface has to be relevante 
-                _, smart_device_values = smart_device
-                if len(smart_device_values["scenarios"][1]) > i: 
-                    if type(smart_device_values["scenarios"][1][i]) == type(interface):
-                        interfaces.extend(smart_device_values["scenarios"][1][i].vector())
-                    else: 
-                        interfaces.extend(interface().vector())
-                else: 
-                    interfaces.extend(interface().vector())
-        res.append(interfaces)
+        temp_res = []
+        temp_res_device = [0] * len(list(SMART_DEVICES.keys()))
+        temp_res_device[smart_device[1]["id"]] = 1
+
+        temp_res.extend(temp_res_device)
+
+        temp_res_interface = [0] * len(INTERFACES)
+        # set relevant interface to 1
+        for interface in smart_device[1]["scenarios"][1]:
+            temp_res_interface[INTERFACES.index(interface)] = 1
+
+        temp_res.extend(temp_res_interface)
+        res.append(temp_res)
+
     return (out, res)

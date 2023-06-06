@@ -1,6 +1,27 @@
 Input Data: 
 
-[(direction_vector xyz), angle, distance, weekday, current_time, (current_values_smart_devices) ]
+[angle, distance, weekday, current_time, (current_values_smart_devices)]
+
+What should the AI Learn: 
+
+If I point at one of the both Radiator at morning hours  (8:00 - 9:00) it should show the switch on Interface
+else: show slider Interace (data min max comes from device itself)
+
+If i point at light 1 show switch 
+if i point at light 2 at evening hours (18-22) show colorChooser 
+else: show slider 
+
+
+Scenatrio 1: 
+
+show random on devices out of special cases (time) 
+
+Scenario 2: 
+point on one of the both Radiator between 8-9 
+
+Scenario 3: 
+
+point at light 2 at evening hours (18-22) and show ColorChooser
 
 Scenario 1: 
 
